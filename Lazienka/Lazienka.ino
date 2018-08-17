@@ -12,7 +12,7 @@
 //#define MY_DEBUG
 // Enable and select radio type attached 
 #define MY_RADIO_NRF24
-#define MY_NODE_ID 14
+#define MY_NODE_ID 6
 
 
 
@@ -41,14 +41,14 @@
 #define RELAY_ON 1  // GPIO value to write to turn on attached relay
 #define RELAY_OFF 0
 
-#define SENSOR_TEMP_OFFSET 3.0
-#define SENSOR_HUM_OFFSET 35.0
+#define SENSOR_TEMP_OFFSET 2.0
+#define SENSOR_HUM_OFFSET 31.0
 
 static const long UPDATE_INTERVAL = 30000;// 0;
 
 static const uint8_t FORCE_UPDATE_N_READS = 6;
 
-#define CHILD_ID_HUM 30
+#define CHILD_ID_HUM 35
 #define CHILD_ID_TEMP 31
 //#define CHILD_ID_VAR 32
 #define CHILD_ID_LIGHT 33
@@ -75,7 +75,7 @@ bool metric = true;
 #define LUX_CALC_EXPONENT         -1.405
 
 
-int16_t lastLux;
+int16_t lastLux=0;
 
 MyMessage msgHum(CHILD_ID_HUM, V_HUM);
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
@@ -99,7 +99,7 @@ void presentation()
 {
 	//noInterrupts();
 	// Send the sketch version information to the gateway
-	sendSketchInfo("RefreshAir", "0.7.4");
+	sendSketchInfo("RefreshAir", "0.7.5");
 
 	// Register all sensors to gw (they will be created as child devices)
 	present(CHILD_ID_HUM, S_HUM);
@@ -199,9 +199,12 @@ void loop() {
 		nNoUpdatesLight = 0;
 
 	}
-	sendJasnosc();
 
-	smartSleep(2000); // przerwa na pomiar
+	sendJasnosc();
+	
+	
+
+	//smartSleep(2000); // przerwa na pomiar
 	sendTemperature();
 	sendHumidity();
 
@@ -303,56 +306,56 @@ void receive(const MyMessage &message)
 	
 	
 }
-
-float LightSensorLDR() {
-
-	int ADC;
-	float RLDR;
-	double Vout;
-	int Lux;
-
-	ADC = analogRead(LUX_DATA_PIN);
-
-	int16_t lightLevel = ADC / 10.23;
-
-
-	Vout = (ADC * 0.0048828125);    // Vout = Output voltage from potential Divider. [Vout = ADC * (Vin / 1024)] 
-
-	RLDR = (10000.0 * (5 - Vout));     // Equation to calculate Resistance of LDR, [R-LDR =(R1 (Vin - Vout))/ Vout]
-											  // R1 = 10,000 Ohms , Vin = 5.0 Vdc.
-
-	Lux = (2500 / Vout - 500) / 10;
-	//Lux = 2500.0 / (1.0 * ((5.0 - Vout) / Vout));
-
-
-	int   ldrRawData;
-	float resistorVoltage, ldrVoltage;
-	float ldrResistance;
-	float ldrLux;
-
-	// Perform the analog to digital conversion  
-	ldrRawData = ADC;
-
-	// RESISTOR VOLTAGE_CONVERSION
-	// Convert the raw digital data back to the voltage that was measured on the analog pin
-	resistorVoltage = (float)ldrRawData / MAX_ADC_READING * ADC_REF_VOLTAGE;
-
-	// voltage across the LDR is the 5V supply minus the 5k resistor voltage
-	ldrVoltage = ADC_REF_VOLTAGE - resistorVoltage;
-
-	// LDR_RESISTANCE_CONVERSION
-	// resistance that the LDR would have for that voltage  
-	ldrResistance = ldrVoltage / resistorVoltage * REF_RESISTANCE;
-
-	// LDR_LUX
-	// Change the code below to the proper conversion from ldrResistance to
-	// ldrLux
-	ldrLux = LUX_CALC_SCALAR * pow(ldrResistance, LUX_CALC_EXPONENT);
-
-
-	//return Lux;
-	return lightLevel;
-}
+//
+//float LightSensorLDR() {
+//
+//	int ADC;
+//	float RLDR;
+//	double Vout;
+//	int Lux;
+//
+//	ADC = analogRead(LUX_DATA_PIN);
+//
+//	int16_t lightLevel = ADC / 10.23;
+//
+//
+//	Vout = (ADC * 0.0048828125);    // Vout = Output voltage from potential Divider. [Vout = ADC * (Vin / 1024)] 
+//
+//	RLDR = (10000.0 * (5 - Vout));     // Equation to calculate Resistance of LDR, [R-LDR =(R1 (Vin - Vout))/ Vout]
+//											  // R1 = 10,000 Ohms , Vin = 5.0 Vdc.
+//
+//	Lux = (2500 / Vout - 500) / 10;
+//	//Lux = 2500.0 / (1.0 * ((5.0 - Vout) / Vout));
+//
+//
+//	int   ldrRawData;
+//	float resistorVoltage, ldrVoltage;
+//	float ldrResistance;
+//	float ldrLux;
+//
+//	// Perform the analog to digital conversion  
+//	ldrRawData = ADC;
+//
+//	// RESISTOR VOLTAGE_CONVERSION
+//	// Convert the raw digital data back to the voltage that was measured on the analog pin
+//	resistorVoltage = (float)ldrRawData / MAX_ADC_READING * ADC_REF_VOLTAGE;
+//
+//	// voltage across the LDR is the 5V supply minus the 5k resistor voltage
+//	ldrVoltage = ADC_REF_VOLTAGE - resistorVoltage;
+//
+//	// LDR_RESISTANCE_CONVERSION
+//	// resistance that the LDR would have for that voltage  
+//	ldrResistance = ldrVoltage / resistorVoltage * REF_RESISTANCE;
+//
+//	// LDR_LUX
+//	// Change the code below to the proper conversion from ldrResistance to
+//	// ldrLux
+//	ldrLux = LUX_CALC_SCALAR * pow(ldrResistance, LUX_CALC_EXPONENT);
+//
+//
+//	//return Lux;
+//	return lightLevel;
+//}
 
 
 
@@ -410,9 +413,12 @@ void sendHumidity() {
 }
 
 void sendJasnosc() {
+	
+
+	//delay(5);
 	int16_t jasnosc = (1023 - analogRead(LUX_DATA_PIN)) / 10.23;
 
-	/*Serial.print("Send jasnosc: ");
+	Serial.print("Send jasnosc: ");
 	Serial.println(jasnosc);
 	Serial.print("last lux: ");
 	Serial.println(lastLux);
@@ -420,16 +426,18 @@ void sendJasnosc() {
 	Serial.println(nNoUpdatesLight);
 	Serial.print("lastLevelTime: ");
 	Serial.println(lastLevelTime);
-*/
-	if (((lastLux != jasnosc) || (nNoUpdatesLight >= FORCE_UPDATE_N_READS)) && (lastLevelTime + 60000< millis())) {
-		/*Serial.println("Jasnosc k1");*/
+
+	if (((lastLux != jasnosc) || (nNoUpdatesLight >= FORCE_UPDATE_N_READS)) && (lastLevelTime + 30000< millis())) {
+		Serial.println("Send jasnosc OK ");
+		
 		lastLux = jasnosc;
 		lastLevelTime = millis();
 		send(msgLight.set(jasnosc, 1));
 		nNoUpdatesLight = 0;
 	}
 	else {
-		/*Serial.println("Jasnosc k2");*/
+		Serial.println("Send jasnosc NO OK ");
+		
 		nNoUpdatesLight++;
 	}
 }
