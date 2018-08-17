@@ -99,7 +99,7 @@ void presentation()
 {
 	//noInterrupts();
 	// Send the sketch version information to the gateway
-	sendSketchInfo("RefreshAir", "0.7.3");
+	sendSketchInfo("RefreshAir", "0.7.4");
 
 	// Register all sensors to gw (they will be created as child devices)
 	present(CHILD_ID_HUM, S_HUM);
@@ -191,6 +191,13 @@ void loop() {
 	if (jasnoscStatus != jasnoscLastStatus) {
 		jasnoscLastStatus = jasnoscStatus;
 		jasnoscLastChange = millis();
+
+		int16_t jasnosc = (1023 - analogRead(LUX_DATA_PIN)) / 10.23;
+		lastLux = jasnosc;
+		lastLevelTime = millis();
+		send(msgLight.set(jasnosc, 1));
+		nNoUpdatesLight = 0;
+
 	}
 	sendJasnosc();
 
