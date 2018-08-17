@@ -99,7 +99,7 @@ void presentation()
 {
 	//noInterrupts();
 	// Send the sketch version information to the gateway
-	sendSketchInfo("RefreshAir", "0.7.2");
+	sendSketchInfo("RefreshAir", "0.7.3");
 
 	// Register all sensors to gw (they will be created as child devices)
 	present(CHILD_ID_HUM, S_HUM);
@@ -412,9 +412,9 @@ void sendJasnosc() {
 	Serial.print("nNoUpdatesLight: ");
 	Serial.println(nNoUpdatesLight);
 	Serial.print("lastLevelTime: ");
-	Serial.println(lastLevelTime);*/
-
-	if (((lastLux != jasnosc) || (nNoUpdatesLight >= FORCE_UPDATE_N_READS)) && (lastLevelTime + 60UL < millis())) {
+	Serial.println(lastLevelTime);
+*/
+	if (((lastLux != jasnosc) || (nNoUpdatesLight >= FORCE_UPDATE_N_READS)) && (lastLevelTime + 60000< millis())) {
 		/*Serial.println("Jasnosc k1");*/
 		lastLux = jasnosc;
 		lastLevelTime = millis();
